@@ -5,22 +5,24 @@ import (
 )
 
 type Wave struct {
-	handler http.Handler
+	server *http.ServeMux
 }
 
 func New() (w *Wave) {
 	w = &Wave{
-		handler: newServer(),
+		server: newServer(),
 	}
 	return
 }
 
-func newServer() http.Handler {
+func newServer() *http.ServeMux {
 	mux := http.NewServeMux()
-	var handler http.Handler = mux
-	return handler
+	return mux
 }
 
+func (w *Wave) Handle(pattern string, handler func(http.ResponseWriter, *http.Request)) {
+	w.server.HandleFunc(pattern, handler)
+}
 func (w *Wave) Start(address string) error {
-	return http.ListenAndServe(address, w.handler)
+	return http.ListenAndServe(address, w.server)
 }
